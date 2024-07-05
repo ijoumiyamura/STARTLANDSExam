@@ -5,8 +5,6 @@ using UnityEngine.InputSystem;
 
 public class Weapon : MonoBehaviour
 {
-    [SerializeField] private GameInput gameInput;
-    [SerializeField] private Player player;
     [SerializeField] private GameObject bullet;
     [SerializeField] private GameObject weaponDock;
     [SerializeField] private float bulletSpeed;
@@ -14,24 +12,28 @@ public class Weapon : MonoBehaviour
     [SerializeField] private float reloadTime;
     [SerializeField] private int magSize;
 
+    public static Weapon Instance { get; private set; }
+
     private int bulletsLeft, bulletsShot;
     private bool shooting, ready, reloading;
     private bool allowInvoke = true;
     private void Awake() {
         bulletsLeft = magSize;
         ready = true;
+
+        Instance = this;
     }
     private void Update()
     {
-        Vector2 inputVector = gameInput.GetAimVectorNormalized();
+        Vector2 inputVector = GameInput.Instance.GetAimVectorNormalized();
         Vector3 aimDirection = new Vector3(inputVector.x, 0f, inputVector.y);
 
         float rotateSpeed = 13f;
-        transform.position = player.transform.position;
+        transform.position = Player.Instance.transform.position;
         transform.forward = Vector3.Slerp(transform.forward, aimDirection, Time.deltaTime * rotateSpeed);
 
         
-        shooting = gameInput.Shoot();
+        shooting = GameInput.Instance.Shoot();
         
         
         if (Input.GetKeyDown(KeyCode.R) && bulletsLeft < magSize && !reloading){

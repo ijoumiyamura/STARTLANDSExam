@@ -5,9 +5,14 @@ using UnityEngine;
 public class GameInput : MonoBehaviour
 {
     private PlayerInputActions playerInputActions; 
+
+    public static GameInput Instance { get; private set; }
+
     private void Awake() {
         playerInputActions = new PlayerInputActions();
         playerInputActions.Player.Enable();    
+
+        Instance = this;
     }
 
     public Vector2 GetMovementVectorNormalized(){
