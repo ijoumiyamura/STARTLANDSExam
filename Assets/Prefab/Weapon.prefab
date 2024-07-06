@@ -10,7 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 6948199307294286694}
   - component: {fileID: 5410160718898867029}
-  - component: {fileID: 3957785197838530784}
+  - component: {fileID: -1859190812748029703}
+  - component: {fileID: -7040037670709198727}
   m_Layer: 0
   m_Name: Weapon
   m_TagString: Untagged
@@ -48,11 +49,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bullet: {fileID: 7074123140390612095, guid: 8e9a3b2edc123f146b0ee9e4e05c4277, type: 3}
   weaponDock: {fileID: 8387298999837150969}
-  bulletSpeed: 15
+  bulletSpeed: 300
   shootInterval: 0.5
   reloadTime: 2
   magSize: 25
---- !u!114 &3957785197838530784
+--- !u!114 &-1859190812748029703
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -68,6 +69,19 @@ MonoBehaviour:
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
+--- !u!114 &-7040037670709198727
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3936670735758476230}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d867a7ec4748154c999091f73671246, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 0}
 --- !u!1 &8387298999837150969
 GameObject:
   m_ObjectHideFlags: 0

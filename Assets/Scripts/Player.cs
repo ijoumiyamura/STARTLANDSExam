@@ -2,15 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using UnityEngine.EventSystems;
+using TMPro;
 
 public class Player: NetworkBehaviour
 {
     [SerializeField] private float moveSpeed = 3f;
-    [SerializeField] private Weapon weaponPrefab;
-
+    [SerializeField] private GameObject weaponPrefab;
+    [SerializeField] private float runSpeed = 5f;
+    [SerializeField] private TextMeshPro playerNameText;
     public static Player Instance { get; private set; }
     private bool isWalking = false;
-
+    private bool isRunning = false;
     private void Awake() {
         Instance = this;
     }
@@ -18,7 +21,6 @@ public class Player: NetworkBehaviour
     {
         if (!IsOwner) return;
         HandleMovement();
-        // HandleMovementServerAuth();
     }
 
     public override void OnNetworkSpawn()
@@ -27,45 +29,57 @@ public class Player: NetworkBehaviour
 
         if(IsLocalPlayer){
             CameraScript.Instance.OnPlayerSpawn(gameObject);
-            Weapon weapon = Instantiate(weaponPrefab, transform.position, Quaternion.identity);
-            weapon.GetComponent<NetworkObject>().Spawn();
         }
     }
-
-    private void HandleMovementServerAuth(){
-        Vector2 inputVector = GameInput.Instance.GetMovementVectorNormalized();
-        HandleMovementServerRpc(inputVector);
-    }
-
-    [ServerRpc]
-    private void HandleMovementServerRpc(Vector2 inputVector){
-        Vector3 moveDirection = new Vector3(inputVector.x, 0f, inputVector.y);
-        
-        transform.position += moveDirection * moveSpeed * Time.deltaTime;
-        
-
-        isWalking = moveDirection != Vector3.zero;
-
-        float rotateSpeed = 13f;
-        transform.forward = Vector3.Slerp(transform.forward, moveDirection, Time.deltaTime * rotateSpeed);
-        
+    public NetworkObject GetNetworkObject(){
+        return NetworkObject;
     }
 
     private void HandleMovement(){
         Vector2 inputVector = GameInput.Instance.GetMovementVectorNormalized();
         Vector3 moveDirection = new Vector3(inputVector.x, 0f, inputVector.y);
+        isRunning = GameInput.Instance.Run();
         
-        transform.position += moveDirection * moveSpeed * Time.deltaTime;
-        
-
+        if (isRunning){
+            Move(runSpeed, moveDirection);  
+        }
+        else{
+            Move(moveSpeed, moveDirection);    
+        }
         isWalking = moveDirection != Vector3.zero;
 
         float rotateSpeed = 13f;
         transform.forward = Vector3.Slerp(transform.forward, moveDirection, Time.deltaTime * rotateSpeed);
-        
     } 
+
+    private void Move(float speed, Vector3 moveDirection){
+        bool canMove = !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * 1f, 0.25f, moveDirection, speed * Time.deltaTime);
+        if (!canMove){
+            Vector3 moveDirX = new Vector3(moveDirection.x, 0, 0);
+            canMove = !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * 1f, 0.25f, moveDirX, speed * Time.deltaTime);
+            if (canMove){
+                moveDirection = moveDirX;
+            }
+            else{
+                Vector3 moveDirZ = new Vector3(0, 0, moveDirection.z);
+                canMove = !Physics.CapsuleCast(transform.position, transform.position + Vector3.up * 1f, 0.25f, moveDirZ, speed * Time.deltaTime);
+
+                if (canMove){
+                    moveDirection = moveDirZ;
+                }
+            }
+        }
+
+        if (canMove){
+            transform.position += moveDirection * speed * Time.deltaTime;
+        }
+    }
 
     public bool IsWalking(){
         return isWalking;
+    }
+
+    public bool IsRunning(){
+        return isRunning;
     }
 }

@@ -17,11 +17,6 @@ public class GameInput : MonoBehaviour
 
     public Vector2 GetMovementVectorNormalized(){
         Vector2 inputVector = playerInputActions.Player.Move.ReadValue<Vector2>();
-
-        // if (Input.GetKey(KeyCode.LeftShift)){
-        //     isRunning = true;
-        // }
-
         inputVector = inputVector.normalized;
 
         return inputVector;
@@ -35,7 +30,11 @@ public class GameInput : MonoBehaviour
         return inputVector;
     }
 
-    public bool Shoot(){
+    public bool Punch(){
         return Input.GetKey(KeyCode.Space);
+    }
+    public bool Run(){
+        return Input.GetKey(KeyCode.LeftShift);
+        
     }
 }
