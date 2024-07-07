@@ -161,7 +161,7 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    Standalone: com.DefaultCompany.STARTLANDSExam
+    Standalone: com.Jou-Games.STARTLANDSExam
   buildNumber:
     Standalone: 0
     VisionOS: 0
@@ -646,7 +646,8 @@ PlayerSettings:
   webGLMemoryGeometricGrowthStep: 0.2
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    Standalone: DEDICATED_SERVER_NO
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend: {}

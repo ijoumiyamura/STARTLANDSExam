@@ -14,6 +14,7 @@ public class Player: NetworkBehaviour
     public static Player Instance { get; private set; }
     private bool isWalking = false;
     private bool isRunning = false;
+    private bool isPunching = false;
     private void Awake() {
         Instance = this;
     }
@@ -21,6 +22,17 @@ public class Player: NetworkBehaviour
     {
         if (!IsOwner) return;
         HandleMovement();
+        isPunching = GameInput.Instance.Punch();
+        if (isPunching){
+            if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 1f)){
+                Damagable damagable = hit.collider.GetComponent<Damagable>();
+                if (damagable != null){
+                    damagable.TakeDamage();
+                    isPunching = false;
+                }
+            }
+            
+        }
     }
 
     public override void OnNetworkSpawn()

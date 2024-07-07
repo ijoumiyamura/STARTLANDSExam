@@ -8,6 +8,7 @@ using Unity.Services.Authentication;
 using Unity.Services.Core;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
+using Unity.Services.Multiplay;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
@@ -20,6 +21,14 @@ public class GameLobby : MonoBehaviour
 
     private Lobby joinedLobby;
     private float hearbeatTimer;
+    private string ipv4Address;
+    private ushort port;
+
+    #if DEDICATED_SERVER
+        private float autoAllocateTimer = 9999999f;
+        private bool alreadyAutoAllocated;
+        private static IServerQueryHandler serverQueryHandler;
+    #endif
 
     private void Awake(){
         Instance = this;
@@ -31,6 +40,21 @@ public class GameLobby : MonoBehaviour
 
     private void Update() {
         HandleHeartBeat();
+
+#if DEDICATED_SERVER
+        autoAllocateTimer -= Time.deltaTime;
+        if (autoAllocateTimer <= 0f){
+            autoAllocateTimer = 999f;
+            MultiplayEventCallbacks_Allocate(null);
+        }
+
+        if (serverQueryHandler != null){
+            if (NetworkManager.Singleton.IsServer){
+                serverQueryHandler.CurrentPlayers = (ushort)NetworkManager.Singleton.ConnectedClientsIds.Count;
+            }
+            serverQueryHandler.UpdateServerCheck();
+        }
+#endif        
     }
 
     private void HandleHeartBeat(){
@@ -40,7 +64,9 @@ public class GameLobby : MonoBehaviour
                 float hearbeatTimerMax = 15f;
                 hearbeatTimer = hearbeatTimerMax;
 
-                LobbyService.Instance.SendHeartbeatPingAsync(joinedLobby.Id);
+                if (joinedLobby != null){
+                    LobbyService.Instance.SendHeartbeatPingAsync(joinedLobby.Id);
+                }
             }
         }
     }
@@ -56,7 +82,37 @@ public class GameLobby : MonoBehaviour
 
             await UnityServices.InitializeAsync(initializationOptions);
 
+#if !DEDICATED_SERVER
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
+#endif
+
+#if DEDICATED_SERVER
+            Debug.Log("DEDICATED_SERVER LOBBY");
+
+            MultiplayEventCallbacks multiplayEventCallbacks = new MultiplayEventCallbacks();
+            multiplayEventCallbacks.Allocate += MultiplayEventCallbacks_Allocate;
+            multiplayEventCallbacks.Deallocate += MultiplayEventCallbacks_Deallocate;
+            multiplayEventCallbacks.Error += MultiplayEventCallbacks_Error;
+            multiplayEventCallbacks.SubscriptionStateChanged += MultiplayEventCallbacks_SubscriptionStateChanged;
+            IServerEvents serverEvents = await MultiplayService.Instance.SubscribeToServerEventsAsync(multiplayEventCallbacks);
+
+            serverQueryHandler = await MultiplayService.Instance.StartServerQueryHandlerAsync(10, "MyServerName", "STARTLANDSExam", "V1", "map");
+
+            var serverConfig = MultiplayService.Instance.ServerConfig;
+            if (serverConfig.AllocationId != ""){
+                MultiplayEventCallbacks_Allocate(new MultiplayAllocation("", serverConfig.ServerId, serverConfig.AllocationId));
+
+            }
+#endif      
+        } else {
+#if DEDICATED_SERVER
+            Debug.Log("DEDICATED_SERVER LOBBY ALREADY INIT");
+
+            var serverConfig = MultiplayService.Instance.ServerConfig;
+            if (serverConfig.AllocationId != ""){
+                MultiplayEventCallbacks_Allocate(new MultiplayAllocation("", serverConfig.ServerId, serverConfig.AllocationId));
+            }
+#endif
         }
     }
 
@@ -92,6 +148,8 @@ public class GameLobby : MonoBehaviour
             JoinAllocation joinAllocation = await JoinRelay(relayJoinCode);
             
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(new RelayServerData(joinAllocation, "dtls"));
+
+            // NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(ipv4Address, port);
             
             GameMultiplayer.Instance.StartClient();
         } catch (LobbyServiceException e){
@@ -134,4 +192,47 @@ public class GameLobby : MonoBehaviour
             return default;
         }
     }
+
+#if DEDICATED_SERVER
+    private void MultiplayEventCallbacks_SubscriptionStateChanged(MultiplayServerSubscriptionState obj){
+        Debug.Log("DEDICATED_SERVER MultiplayEventCallbacks_SubscriptionStateChanged");
+        Debug.Log(obj);
+    }
+
+    private void MultiplayEventCallbacks_Error(MultiplayError obj){
+        Debug.Log("DEDICATED_SERVER MultiplayEventCallbacks_Error");
+        Debug.Log(obj.Reason);
+    }
+
+    private void MultiplayEventCallbacks_Deallocate(MultiplayDeallocation obj){
+        Debug.Log("DEDICATED_SERVER MultiplayEventCallbacks_Deallocate");
+    }
+    private async void MultiplayEventCallbacks_Allocate(MultiplayAllocation obj){
+        Debug.Log("DEDICATED_SERVER MultiplayEventCallbacks_Allocate");
+
+        if (alreadyAutoAllocated){
+            Debug.Log("Alreadu auto allocated!");
+            return;
+        }
+
+        alreadyAutoAllocated = true;
+
+        var serverConfig = MultiplayService.Instance.ServerConfig;
+        Debug.Log($"Server ID[{serverConfig.ServerId}]");
+        Debug.Log($"AllocationID[{serverConfig.AllocationId}]");
+        Debug.Log($"Port[{serverConfig.Port}]");
+        Debug.Log($"QueryPort[{serverConfig.QueryPort}]");
+        Debug.Log($"LogDirectory[{serverConfig.ServerLogDirectory}]");
+
+        ipv4Address = "0.0.0.0";
+        port = serverConfig.Port;
+        NetworkManager.Singleton.GetComponent<UnityTransport>().SetConnectionData(ipv4Address, port, "0.0.0.0");
+        
+        GameMultiplayer.Instance.StartServer();
+
+        await MultiplayService.Instance.ReadyServerForPlayersAsync();
+        Camera.main.enabled = false; 
+
+    }
+#endif
 }

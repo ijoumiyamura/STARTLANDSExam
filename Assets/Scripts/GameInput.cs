@@ -31,7 +31,7 @@ public class GameInput : MonoBehaviour
     }
 
     public bool Punch(){
-        return Input.GetKey(KeyCode.Space);
+        return Input.GetKeyDown(KeyCode.Space);
     }
     public bool Run(){
         return Input.GetKey(KeyCode.LeftShift);
