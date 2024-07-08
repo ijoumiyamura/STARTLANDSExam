@@ -5,17 +5,20 @@ using Unity.Netcode;
 using UnityEngine.EventSystems;
 using TMPro;
 using Unity.Collections;
+using System;
 
 public class Player: NetworkBehaviour
 {
     [SerializeField] private float moveSpeed = 3f;
     [SerializeField] private float runSpeed = 5f;
+    [SerializeField] private float jumpDuration = 0.2f;
     // public TextMeshPro playerNameText;
     // private NetworkVariable<FixedString32Bytes> playerName = new NetworkVariable<FixedString32Bytes>();
     public static Player Instance { get; private set; }
     private bool isWalking = false;
     private bool isRunning = false;
     private bool isPunching = false;
+    private bool isJumping = false;
     private void Awake() {
         Instance = this;
     }
@@ -69,6 +72,49 @@ public class Player: NetworkBehaviour
             }
             
         }
+        isJumping = GameInput.Instance.Jump();
+        if (isJumping){
+            Animator animator = GetComponentInChildren<Animator>();
+            animator.SetTrigger("Jump");
+            StartCoroutine(LerpPosition());
+            // visualTransform.position = Vector3.Lerp(transform.position, new Vector3(transform.position.x, transform.position.y - 1, transform.position.z), Time.deltaTime * 2f);
+        }
+    }
+
+    IEnumerator LerpPosition(){
+        Transform visualTransform = GetComponentInChildren<Transform>();
+        float elapsedTime = 0.0f;
+        Vector3 startPosition = visualTransform.position;
+        Vector3 targetPosition = new Vector3(visualTransform.position.x, 0.5f, visualTransform.position.z);
+
+        while (elapsedTime < jumpDuration){
+            elapsedTime += Time.deltaTime;
+            float jumpTime = Mathf.Clamp01(elapsedTime / jumpDuration);
+
+            jumpTime = Mathf.SmoothStep(0.0f, 1.0f, jumpTime);
+
+            visualTransform.position = Vector3.Lerp(startPosition, targetPosition, jumpTime);
+            yield return null;
+        }
+        
+        visualTransform.position = targetPosition;
+        elapsedTime = 0.0f;
+        startPosition = visualTransform.position;
+        targetPosition = new Vector3(visualTransform.position.x, 0.0f, visualTransform.position.z);
+
+        while (elapsedTime < jumpDuration){
+            elapsedTime += Time.deltaTime;
+
+            float jumpTime = Mathf.Clamp01(elapsedTime / jumpDuration);
+
+            jumpTime = Mathf.SmoothStep(0.0f, 1.0f, jumpTime);
+
+            visualTransform.position = Vector3.Lerp(startPosition, targetPosition, jumpTime);
+
+            yield return null;
+        }
+
+        visualTransform.position = targetPosition;
     }
 
     public override void OnNetworkSpawn()

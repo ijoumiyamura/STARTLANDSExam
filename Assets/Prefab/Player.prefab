@@ -52,6 +52,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 3
   runSpeed: 7
+  jumpDuration: 0.2
 --- !u!136 &1606227076837576122
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -117,7 +118,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SyncPositionX: 1
-  SyncPositionY: 0
+  SyncPositionY: 1
   SyncPositionZ: 1
   SyncRotAngleX: 0
   SyncRotAngleY: 1
@@ -444,15 +445,33 @@ MonoBehaviour:
     TriggerNameHash: 1080829965
     TransitionIndex: 1
   - Layer: 0
+    OriginatingState: -1919845803
+    DestinationState: -1481439722
+    TransitionDuration: 0
+    TriggerNameHash: 125937960
+    TransitionIndex: 3
+  - Layer: 0
     OriginatingState: -601574123
     DestinationState: -1993207029
     TransitionDuration: 0
     TriggerNameHash: 1080829965
     TransitionIndex: 1
   - Layer: 0
+    OriginatingState: -601574123
+    DestinationState: -1481439722
+    TransitionDuration: 0
+    TriggerNameHash: 125937960
+    TransitionIndex: 2
+  - Layer: 0
     OriginatingState: -276802121
     DestinationState: -1993207029
     TransitionDuration: 0
     TriggerNameHash: 1080829965
     TransitionIndex: 1
+  - Layer: 0
+    OriginatingState: -276802121
+    DestinationState: -1481439722
+    TransitionDuration: 0
+    TriggerNameHash: 125937960
+    TransitionIndex: 2
   m_Animator: {fileID: 1806425304946132154}

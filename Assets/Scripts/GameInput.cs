@@ -31,10 +31,14 @@ public class GameInput : MonoBehaviour
     }
 
     public bool Punch(){
-        return Input.GetKeyDown(KeyCode.Space);
+        return Input.GetKeyDown(KeyCode.E);
     }
     public bool Run(){
         return Input.GetKey(KeyCode.LeftShift);
+        
+    }
+    public bool Jump(){
+        return Input.GetKeyDown(KeyCode.Space);
         
     }
 }
