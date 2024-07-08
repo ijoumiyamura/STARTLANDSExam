@@ -41,4 +41,8 @@ public class GameInput : MonoBehaviour
         return Input.GetKeyDown(KeyCode.Space);
         
     }
+
+    public bool Build(){
+        return Input.GetKeyDown(KeyCode.B);
+    }
 }

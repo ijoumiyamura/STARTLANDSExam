@@ -19,6 +19,7 @@ public class Player: NetworkBehaviour
     private bool isRunning = false;
     private bool isPunching = false;
     private bool isJumping = false;
+    private bool isBuilding = false;
     private void Awake() {
         Instance = this;
     }
@@ -78,6 +79,19 @@ public class Player: NetworkBehaviour
             animator.SetTrigger("Jump");
             StartCoroutine(LerpPosition());
             // visualTransform.position = Vector3.Lerp(transform.position, new Vector3(transform.position.x, transform.position.y - 1, transform.position.z), Time.deltaTime * 2f);
+        }
+
+        isBuilding = GameInput.Instance.Build();
+        if (isBuilding){
+            Animator animator = GetComponentInChildren<Animator>();
+            animator.SetTrigger("Attack");
+            if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 1f)){
+                Damagable damagable = hit.collider.GetComponent<Damagable>();
+                if (damagable != null){
+                    damagable.TakeDamage();
+                    isPunching = false;
+                }
+            }
         }
     }
 
