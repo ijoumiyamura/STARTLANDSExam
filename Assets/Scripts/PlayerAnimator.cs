@@ -15,5 +15,6 @@ public class PlayerAnimator : NetworkBehaviour
     private void Update() {
         if (!IsOwner) return;
         animator.SetBool("IsWalking", player.IsWalking());
+        animator.SetBool("IsRunning", player.IsRunning());
     }
 }
