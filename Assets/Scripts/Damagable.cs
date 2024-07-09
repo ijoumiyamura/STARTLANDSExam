@@ -20,7 +20,7 @@ public class Damagable : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void RequestDamageServerRpc()
     {
-        SpawnDamagedClientRpc();
+        RequestSpawnDamagedClientRpc();
         DestroyServerRpc();
     }
 
@@ -32,20 +32,22 @@ public class Damagable : NetworkBehaviour
         {
             networkObject.Despawn(true);
         }
-        else
-        {
-            // Destroy(gameObject);
-        }
-        
     }
 
-    [ClientRpc]
-    private void SpawnDamagedClientRpc(){
+    [ServerRpc(RequireOwnership = false)]
+    private void SpawnDamagedServerRpc(){
         GameObject newVersion = Instantiate(damagedVersion, transform.position, transform.rotation);
         NetworkObject newNetworkObject = newVersion.GetComponent<NetworkObject>();
 
         if (newNetworkObject != null){
             newNetworkObject.Spawn(true);
+        }
+    }
+
+    [ClientRpc]
+    private void RequestSpawnDamagedClientRpc(){
+        if (IsClient){
+            SpawnDamagedServerRpc();
         }
     }
 }

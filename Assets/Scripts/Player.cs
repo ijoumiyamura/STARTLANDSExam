@@ -19,14 +19,11 @@ public class Player: NetworkBehaviour
     private bool isRunning = false;
     private bool isPunching = false;
     private bool isJumping = false;
-    private bool isBuilding = false;
     private void Awake() {
         Instance = this;
     }
 
     private void Start() {
-        // playerName.OnValueChanged += OnPlayerNameChanged;
-
         if (IsOwner){
 
             if (TestUI.Instance == null){
@@ -43,18 +40,6 @@ public class Player: NetworkBehaviour
             // PlayerNetworkManager.Instance.RegisterPlayerNameServerRpc(OwnerClientId, localPlayerName);
         }
     }
-
-    // public override void OnDestroy() {
-    //     playerName.OnValueChanged -= OnPlayerNameChanged;
-    // }
-
-    // private void OnPlayerNameChanged(FixedString32Bytes oldValue, FixedString32Bytes newValue){
-    //     playerNameText.text = newValue.ToString();
-    // }
-
-    // public void SetPlayerName(string newName){
-    //     playerName.Value = new FixedString32Bytes(newName);
-    // }
 
     private void Update()
     {
@@ -78,20 +63,6 @@ public class Player: NetworkBehaviour
             Animator animator = GetComponentInChildren<Animator>();
             animator.SetTrigger("Jump");
             StartCoroutine(LerpPosition());
-            // visualTransform.position = Vector3.Lerp(transform.position, new Vector3(transform.position.x, transform.position.y - 1, transform.position.z), Time.deltaTime * 2f);
-        }
-
-        isBuilding = GameInput.Instance.Build();
-        if (isBuilding){
-            Animator animator = GetComponentInChildren<Animator>();
-            animator.SetTrigger("Attack");
-            if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 1f)){
-                Damagable damagable = hit.collider.GetComponent<Damagable>();
-                if (damagable != null){
-                    damagable.TakeDamage();
-                    isPunching = false;
-                }
-            }
         }
     }
 

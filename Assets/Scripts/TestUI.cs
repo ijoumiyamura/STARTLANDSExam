@@ -14,23 +14,15 @@ public class TestUI : MonoBehaviour
 
     public static TestUI Instance { get; private set; }
     private string newText;
-
-    // [SerializeField] private TextMeshPro playerNameText;
-
     private void Awake() {
         Instance = this;
         startHostBtn.onClick.AddListener(() => {
             GameLobby.Instance.CreateLobby("TestLobby", false);
-            // GameMultiplayer.Instance.SetPlayerName(playerNameInputField.text);
-            // playerNameText = Player.Instance.nameText;
-            // Player.Instance.nameText.text = playerNameInputField.text;
             Hide();
         });
 
         startClientBtn.onClick.AddListener(() => {
             GameLobby.Instance.QuickJoin();
-            // playerNameText = Player.Instance.nameText;
-            // playerNameText.text = playerNameInputField.text;
             Hide();
         });
     }

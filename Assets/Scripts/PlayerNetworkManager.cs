@@ -9,11 +9,9 @@ public class PlayerNetworkManager : NetworkBehaviour
 {
     public static PlayerNetworkManager Instance { get; private set; }
 
-    private NetworkList<PlayerData> playerDataList/* = new NetworkList<PlayerData>()*/;
-    // private Dictionary<ulong, string> playerNames = new Dictionary<ulong, string>();
+    private NetworkList<PlayerData> playerDataList;
 
     private void Awake() {
-        // Instance = this;
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
